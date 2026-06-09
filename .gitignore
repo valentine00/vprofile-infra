@@ -1,0 +1,12 @@
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+*.tfstate
+*.tfstate.*
+*.backup
+*.log
+*.prov
+
+# Local config files
+.terraformrc
+terraform.rc

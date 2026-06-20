@@ -10,6 +10,7 @@ jobs:
   terraform_plan:
     name: Terraform validate and plan
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
 
     outputs:
       drift_detected: ${{ steps.plan.outputs.drift_detected }}
@@ -102,11 +103,11 @@ jobs:
       - name: Terraform apply
         run: terraform apply -auto-approve -input=false tfplan
 
-  slack_notification:
-    name: Notify Slack on Terraform changes
+  slack_plan_notification:
+    name: Notify Slack on Terraform plan job
     runs-on: ubuntu-latest
     needs: terraform_plan
-    if: success()
+    if: always()
 
     steps:
       - name: Notify Slack
@@ -114,16 +115,24 @@ jobs:
         with:
           payload: |
             {
-              "text": "Terraform plan completed for `${{ github.repository }}` on `${{ github.ref_name }}` via `${{ github.event_name }}`. Drift detected: `${{ needs.terraform_plan.outputs.drift_detected }}`. Apply manually: https://github.com/${{ github.repository }}/actions/workflows/terraform.yaml/dispatches",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Terraform plan completed* for `<https://github.com/${{ github.repository }}|${{ github.repository }}>` on *${{ github.ref_name }}* via `${{ github.event_name }}`. Drift detected: `${{ needs.terraform_plan.outputs.drift_detected }}`."
-                  }
-                }
-              ]
+              "text": "*Terraform Plan Result*\nRepository: `${{ github.repository }}`\nBranch: `${{ github.ref_name }}`\nStatus: *${{ needs.terraform_plan.result }}*\nDrift detected: `${{ needs.terraform_plan.outputs.drift_detected }}`"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  slack_apply_notification:
+    name: Notify Slack on terraform apply job
+    runs-on: ubuntu-latest
+    needs: terraform_apply
+    if: always() && github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          payload: |
+            {
+              "text": "Terraform apply for `${{ github.repository }}` finished with status: `${{ needs.terraform_apply.result }}`"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

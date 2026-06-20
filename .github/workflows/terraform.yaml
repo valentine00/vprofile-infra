@@ -115,7 +115,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "Terraform plan completed with status: `${{ needs.terraform_plan.result }}`",
+              
               "blocks": [
                 {
                   "type": "section",

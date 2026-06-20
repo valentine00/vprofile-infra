@@ -115,16 +115,7 @@ jobs:
         with:
           payload: |
             {
-              
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Terraform Plan Result*\nRepository: `${{ github.repository }}`\nBranch: `${{ github.ref_name }}`\nStatus: *${{ needs.terraform_plan.result }}*\nDrift detected: `${{ needs.terraform_plan.outputs.drift_detected }}`"
-                  }
-                }
-              ]
+              "text": "*Terraform Plan Result*\nRepository: `${{ github.repository }}`\nBranch: `${{ github.ref_name }}`\nStatus: *${{ needs.terraform_plan.result }}*\nDrift detected: `${{ needs.terraform_plan.outputs.drift_detected }}`"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -141,7 +132,7 @@ jobs:
         with:
           payload: |
             {
-            "text": "Terraform apply for `${{ github.repository }}` finished with status: `${{ needs.terraform_apply.result }}`"
+              "text": "Terraform apply for `${{ github.repository }}` finished with status: `${{ needs.terraform_apply.result }}`"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
